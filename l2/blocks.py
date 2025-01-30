@@ -61,16 +61,17 @@ def form_cfg(blocks):
     
     return cfg
 
-
-with open(sys.argv[1]) as f:
-    program = json.load(f)
-
-
-for func in program['functions']:
-    bb = form_blocks(func)
-    bb = prevent_fallthrough(bb)
-    cfg = form_cfg(bb)
-    print(cfg)
-    # break
+def main():
+    with open(sys.argv[1]) as f:
+        program = json.load(f)
 
 
+    for func in program['functions']:
+        bb = form_blocks(func)
+        bb = prevent_fallthrough(bb)
+        cfg = form_cfg(bb)
+        print(cfg)
+        # break
+        
+if __name__ == '__main__':
+    main()
