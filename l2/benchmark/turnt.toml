@@ -1,0 +1,3 @@
+[envs.test]
+command = "bril2json < {filename} | brili {args}"
+output.prof = "2"

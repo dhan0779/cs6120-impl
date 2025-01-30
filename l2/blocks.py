@@ -1,6 +1,8 @@
 import json, sys, random
+from collections import OrderedDict
 
 TERMINATOR = 'br', 'jmp'
+block_map = OrderedDict()
 
 def form_blocks(func):
     blocks = []
@@ -28,7 +30,7 @@ def prevent_fallthrough(blocks):
             if i == len(blocks) - 1:
                 block.append({'op': 'ret', 'args': []})
             else:
-                dest = 'block' + str(random.random())
+                dest = block_map.keys()[i + 1]
                 block.append({'op': 'jmp', 'labels': [dest]})
         elif block[-1]['op'] not in TERMINATOR:
             if i == len(blocks) - 1:
@@ -36,7 +38,6 @@ def prevent_fallthrough(blocks):
     return blocks
 
 def create_block_name_map(blocks):
-    block_map = {}
     for block in blocks:
         if 'label' in block[0]:
             name = block[0]['label']
