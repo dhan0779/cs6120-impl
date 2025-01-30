@@ -22,6 +22,19 @@ def form_blocks(func):
     
     return blocks
 
+def prevent_fallthrough(blocks):
+    for i, block in enumerate(blocks):
+        if not block:
+            if i == len(blocks) - 1:
+                block.append({'op': 'ret', 'args': []})
+            else:
+                dest = 'block' + str(random.random())
+                block.append({'op': 'jmp', 'labels': [dest]})
+        elif block[-1]['op'] not in TERMINATOR:
+            if i == len(blocks) - 1:
+                block.append({'op': 'ret', 'args': []})
+    return blocks
+
 def create_block_name_map(blocks):
     block_map = {}
     for block in blocks:
@@ -55,6 +68,7 @@ with open(sys.argv[1]) as f:
 
 for func in program['functions']:
     bb = form_blocks(func)
+    bb = prevent_fallthrough(bb)
     cfg = form_cfg(bb)
     print(cfg)
     # break
