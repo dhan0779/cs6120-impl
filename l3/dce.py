@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import json, sys
 import os
 
@@ -22,19 +24,19 @@ def dce(blocks):
             
             if len(new_block) == len(block):
                 func_change = False
-            block = new_block
+            block[:] = new_block
     
     return blocks
 
 def main():
-    with open(sys.argv[1]) as f:
-        program = json.load(f)
+    program = json.loads(sys.stdin.read())
 
     for func in program['functions']:
-        print(func)
         blocks = form_blocks(func)
         func_with_dce = dce(blocks)
-        print(func_with_dce)
+        func = func_with_dce
+    
+    json.dump(program, sys.stdout, indent=2, sort_keys=True)
 
 if __name__ == '__main__':
     main()
