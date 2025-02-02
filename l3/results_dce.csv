@@ -1,0 +1,17 @@
+benchmark,run,result
+skipped,baseline,4
+skipped,dce,4
+double,baseline,6
+double,dce,6
+simple,baseline,5
+simple,dce,5
+reassign,baseline,3
+reassign,dce,3
+double-pass,baseline,missing
+double-pass,dce,missing
+diamond,baseline,6
+diamond,dce,6
+combo,baseline,missing
+combo,dce,missing
+reassign-dkp,baseline,missing
+reassign-dkp,dce,missing

@@ -1,0 +1,1 @@
+run brench with `brench config.toml > results.csv`
