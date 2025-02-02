@@ -43,6 +43,7 @@ def lvn(blocks):
         lvn_table = {} # value tuple to canonical
         var2num = Var2Num() # var name to number table
         num2canonical = {} # number to canonical name table
+        const_map = {}
         # lvn starts here for each basic block
         for fresh, instr in check_overwritten(block):
             arg_vars = form_args_tuple(instr, var2num) # this is the value tuple arguments
@@ -54,16 +55,23 @@ def lvn(blocks):
             if value in lvn_table:
                 num, dest = lvn_table[value]
                 var2num[instr['dest']] = num
+                
+                if num in const_map:  # Value is a constant.
+                    instr.update({'op': 'const', 'value': const_map[num]})
+                    del instr['args']
+                else:
+                    instr.update({'op': 'id', 'args': [dest]})
 
-                instr.update({'op': 'id', 'args': [dest]})
-
-            elif 'dest' in instr:
+            elif 'dest' in instr and instr['op'] != 'call':
                 num = var2num.generate_new_val()
                 dest = instr['dest']
 
                 if not fresh:
                     dest = dest + str(num)
 
+                if instr['op'] == 'const':
+                    const_map[num] = instr['value']
+                    
                 var2num[dest] = num
                 num2canonical[num] = dest
 
@@ -73,7 +81,6 @@ def lvn(blocks):
                 for a in instr.get('args', []):
                     new_args.append(num2canonical[var2num[a]])
                 instr['args'] = new_args
-            # print(lvn_table)
     
     return blocks
 
