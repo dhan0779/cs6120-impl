@@ -10,7 +10,13 @@ from l2.blocks import form_blocks
 # this table needs a number, val -> tuple or const, var -> canonical name
 # the tuple is the (op, number, number)
 # if tuple is redundancy, add to cloud with var name which points to number in table 
+
+#check redundancy by doing a pass through the block
 # after adding to table, reconstruct the instruction with the new table according to value tuple
+# for copy prop -> we can consider (ID, 3) -> 3
+# for CSE commutativity -> (mul, a, b) -> (mul, b, a) sort by operand
+# constant prop -> separate table for constants (nonconstant vs id)
+# constant folding -> check binops
 
 class Var2Num(dict):
     def __init__(self):
@@ -22,7 +28,7 @@ class Var2Num(dict):
         return self.counter
     
 def form_args_tuple(instr, var2num):
-        return tuple([var2num[arg] for arg in instr.get('args', [])])
+        return tuple(sorted([var2num[arg] for arg in instr.get('args', [])]))
 
 
 def check_overwritten(block):
@@ -36,6 +42,20 @@ def check_overwritten(block):
                 dest_fresh.append((False, instr))
             fresh.add(instr['dest'])
     return dest_fresh[::-1]
+
+def constant_folding(value, const_map):
+    op, args = value[0], value[1:]
+    try:
+        if op == "add":
+            return const_map[args[0]] + const_map[args[1]]
+        elif op == "sub":
+            return const_map[args[0]] - const_map[args[1]]
+        elif op == "mul":
+            return const_map[args[0]] * const_map[args[1]]
+        elif op == "div":
+            return const_map[args[0]] / const_map[args[1]]
+    except:
+        return None
 
 
 def lvn(blocks):
@@ -51,6 +71,9 @@ def lvn(blocks):
                 arg_vars = instr['value']
 
             value = (instr['op'], ) + (arg_vars, )
+            cf = constant_folding(value, const_map)
+            if cf is not None:
+                value = ("const", cf)
             # print(value)
             if value in lvn_table:
                 num, dest = lvn_table[value]
